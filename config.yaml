@@ -1,0 +1,71 @@
+# Clockify Weekly Scheduler Configuration
+# ========================================
+# 
+# Set your API key as an environment variable or in a .env file:
+#   export CLOCKIFY_API_KEY="your-api-key-here"
+#
+# To find your workspace ID:
+#   1. Go to Clockify web app
+#   2. Click on Settings > Workspace
+#   3. The workspace ID is in the URL
+
+api_key: "${CLOCKIFY_API_KEY}"
+workspace_id: "5ede7e6dc8287e38e8b8296c"
+
+# Hour to start the first entry (24h format)
+day_start_hour: 9
+
+# Weekly schedule - entries are created in order
+# Each project gets a daily entry with the specified duration
+schedule:
+  - name: "Opción Yo"
+    project_id: "67ec09e9199d2e78f84ae376"
+    daily_minutes: 24
+    description_templates:
+      - "meeting with team, working on document roadmap"
+      - "team sync, documentation updates"
+      - "roadmap review, planning session"
+      - "sync with devs"
+      - "back & forth with devs and customer"
+
+  - name: "RateFast V1: Project Management"
+    project_id: "685afbef825f0d5446a6aa28"
+    daily_minutes: 120
+    description_templates:
+      - "summary of the week, blockers, clearing out doubts from the team, checking security report and sprint"
+      - "sprint planning, security review, team coordination"
+      - "reviewing blockers, sprint updates, team sync"
+      - "back & forth with devs and customer"
+
+  - name: "Ship Money Maintenance"
+    project_id: "661966a48f35f243a66b698f"
+    daily_minutes: 120
+    description_templates:
+      - "plans for next week, meeting with team, workarounds to test blue screen issue"
+      - "debugging issues, team coordination, testing"
+      - "maintenance tasks, bug fixes, planning"
+      - "meeting, progress checking, estimations and reports"
+
+  - name: "Flutter Flow"
+    project_id: "65f9e36357bb57198c805918"
+    daily_minutes: 64
+    description_templates:
+      - "proposal for FF maestro test, improvements to plan, meeting with Ale"
+      - "feature planning, implementation discussion"
+      - "testing improvements, team sync"
+      - "triage status, sync with devs, automation updates and re-sync"
+
+  - name: "Greenopia"
+    project_id: "691b2a500bbbbd46d458eb6b"
+    daily_minutes: 120
+    description_templates:
+      - "weekly reports, meeting with team, testing build"
+      - "code review, testing, report generation"
+      - "build verification, team meeting"
+      - "priorities and changes to tickets"
+
+  - name: "Training"
+    project_id: "6081027fc1c5447519dd6d68"
+    daily_minutes: 32
+    description_templates:
+      - "unnasigned time"
