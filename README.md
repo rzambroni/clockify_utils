@@ -50,6 +50,24 @@ Double-click `Clockify Menu.command` for an interactive menu to run common opera
 | `--dry-run, -d` | Preview without creating entries |
 | `--analyze-history` | Use past entries to enhance descriptions |
 
+## Contributing
+
+To contribute to this project, please follow these steps:
+
+1. **Create a new branch** for your feature or bugfix:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+2. **Make your changes** and commit them.
+3. **Push your branch** to GitHub:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+4. **Open a Pull Request** on GitHub for review.
+
+> [!IMPORTANT]
+> Direct pushes to the `main` branch are restricted. Please use Pull Requests for all changes.
+
 ## Features
 
 - ✅ **Duplicate detection** - Won't create entries if one already exists for that project/day
