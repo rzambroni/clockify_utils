@@ -6,33 +6,39 @@ Automate your weekly Clockify time entries with configurable projects, durations
 
 1. **Install dependencies:**
    ```bash
-   cd /Users/renzozambroni/Projects/clockify_utils
    pip install -r requirements.txt
    ```
 
-2. **Set up your API key:**
+2. **Set up your environment:**
    ```bash
    cp .env.example .env
-   # Edit .env and add your Clockify API key
+   cp config.example.yaml config.yaml
    ```
 
-3. **Get your project IDs:**
+3. **Configure your API key:**
+   Edit `.env` and add your Clockify API key (find it at [Clockify Profile Settings](https://app.clockify.me/user/settings)).
+
+4. **Get your workspace and project IDs:**
    ```bash
    python fetch_projects.py
    ```
 
-4. **Configure your schedule:**
-   Edit `config.yaml` with your workspace ID and project IDs.
+5. **Configure your schedule:**
+   Edit `config.yaml` with your workspace ID, project IDs, and desired daily durations.
 
-5. **Run a dry-run to preview:**
+6. **Run a dry-run to preview:**
    ```bash
    python weekly_scheduler.py --dry-run --start-date 2026-01-12 --end-date 2026-01-15
    ```
 
-6. **Create the entries:**
+7. **Create the entries:**
    ```bash
    python weekly_scheduler.py --start-date 2026-01-12 --end-date 2026-01-15
    ```
+
+## macOS Quick Access
+
+Double-click `Clockify Menu.command` for an interactive menu to run common operations.
 
 ## CLI Options
 

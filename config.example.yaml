@@ -1,0 +1,36 @@
+# Clockify Weekly Scheduler Configuration
+# ========================================
+# 
+# Set your API key as an environment variable or in a .env file:
+#   export CLOCKIFY_API_KEY="your-api-key-here"
+#
+# To find your workspace ID:
+#   1. Go to Clockify web app
+#   2. Click on Settings > Workspace
+#   3. The workspace ID is in the URL
+#
+# To find your project IDs, run: python fetch_projects.py
+
+api_key: "${CLOCKIFY_API_KEY}"
+workspace_id: "your-workspace-id-here"
+
+# Hour to start the first entry (24h format)
+day_start_hour: 9
+
+# Weekly schedule - entries are created in order
+# Each project gets a daily entry with the specified duration
+schedule:
+  - name: "Project Name"
+    project_id: "your-project-id-here"
+    daily_minutes: 60
+    description_templates:
+      - "team sync, documentation updates"
+      - "code review, planning session"
+      - "debugging, implementation"
+
+  - name: "Another Project"
+    project_id: "another-project-id-here"
+    daily_minutes: 120
+    description_templates:
+      - "feature development, testing"
+      - "sprint planning, team coordination"
