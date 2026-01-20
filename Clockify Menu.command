@@ -16,6 +16,9 @@ CYAN='\033[0;36m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
+# Set terminal title
+echo -ne "\033]0;Clockify Weekly Entry Creator\007"
+
 while true; do
     # Get dates
     TODAY=$(date +%Y-%m-%d)
@@ -109,6 +112,8 @@ while true; do
             ;;
         q|Q)
             echo "Bye!"
+            # Close the terminal window automatically
+            osascript -e 'tell application "Terminal" to close (every window whose name contains "Clockify Weekly Entry Creator")' &
             exit 0
             ;;
         *)
