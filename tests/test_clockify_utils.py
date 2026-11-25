@@ -31,8 +31,11 @@ class FakeResponse:
 
 def load_original_client():
     """The pre-refactor clockify_client.py, straight from git (initial commit)."""
-    src = subprocess.run(["git", "show", "1350059:clockify_client.py"], cwd=ROOT,
-                         capture_output=True, text=True, check=True).stdout
+    result = subprocess.run(["git", "show", "1350059:clockify_client.py"], cwd=ROOT,
+                            capture_output=True, text=True)
+    if result.returncode != 0:
+        raise unittest.SkipTest("original commit not available (shallow clone)")
+    src = result.stdout
     mod = types.ModuleType("original_clockify_client")
     exec(compile(src, "original_clockify_client.py", "exec"), mod.__dict__)
     return mod
@@ -126,6 +129,25 @@ class TestDates(unittest.TestCase):
 
 
 class TestSettings(unittest.TestCase):
+    def test_system_timezone_is_dst_aware(self):
+        from clockify_utils import settings
+        with mock.patch.dict(os.environ, {"TZ": "America/New_York"}):
+            tz = settings._system_timezone()
+        winter = datetime(2026, 1, 15, 9, tzinfo=tz).utcoffset()
+        summer = datetime(2026, 7, 15, 9, tzinfo=tz).utcoffset()
+        self.assertEqual((winter, summer), (timedelta(hours=-5), timedelta(hours=-4)))
+
+    def test_save_prefs_is_private(self):
+        import tempfile
+        from clockify_utils import settings
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "prefs.json")
+            with mock.patch.dict(os.environ, {"CLOCKIFY_PREFS_PATH": path}):
+                settings.save_prefs({"api_key": "k"})
+                settings.save_prefs({"workspace_id": "w"})
+                self.assertEqual(settings.load_prefs(), {"api_key": "k", "workspace_id": "w"})
+            self.assertEqual(os.stat(path).st_mode & 0o777, 0o600)
+
     def test_key_precedence(self):
         from clockify_utils import settings
         with mock.patch.object(settings, "load_env_files"), \

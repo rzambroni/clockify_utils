@@ -142,7 +142,11 @@ class ClockifyClient:
         for attempt in range(self.MAX_RETRIES + 1):
             response = self.session.request(method, url, **kwargs)
             if response.status_code == 429 and attempt < self.MAX_RETRIES:
-                time.sleep(float(response.headers.get("Retry-After", 1 + attempt * 2)))
+                try:
+                    wait = float(response.headers.get("Retry-After", ""))
+                except ValueError:  # missing, or an HTTP date
+                    wait = 1 + attempt * 2
+                time.sleep(min(wait, 60))
                 continue
             break
         if not response.ok:

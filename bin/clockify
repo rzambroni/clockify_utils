@@ -10,4 +10,5 @@ done
 REPO="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
 export PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}"
 export PYTHONWARNINGS="${PYTHONWARNINGS:-ignore::Warning:urllib3}"
-exec "${CLOCKIFY_PYTHON:-/usr/bin/python3}" -m clockify_utils "$@"
+# Same interpreter the menu uses (python3 from PATH); override with CLOCKIFY_PYTHON
+exec "${CLOCKIFY_PYTHON:-python3}" -m clockify_utils "$@"

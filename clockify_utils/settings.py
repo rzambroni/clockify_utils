@@ -70,7 +70,10 @@ def save_prefs(updates: dict) -> Path:
     data = load_prefs()
     data.update({k: v for k, v in updates.items() if v is not None})
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2) + "\n")
+    # Create with 0600 from the start so the key is never world-readable
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(json.dumps(data, indent=2) + "\n")
     os.chmod(path, 0o600)
     return path
 
@@ -168,7 +171,30 @@ def resolve_timezone(prefs: Optional[dict] = None) -> tuple:
             return timezone(timedelta(hours=float(offset))), source
         except ValueError:
             pass
-    return datetime.now().astimezone().tzinfo, "system"
+    return _system_timezone(), "system"
+
+
+def _system_timezone() -> tzinfo:
+    """The system zone as a real ZoneInfo (DST-aware) when it can be named.
+
+    Falls back to today's fixed offset only if no IANA name can be found.
+    """
+    try:
+        from zoneinfo import ZoneInfo
+
+        candidates = [os.environ.get("TZ", "").lstrip(":")]
+        link = os.path.realpath("/etc/localtime")
+        if "zoneinfo/" in link:
+            candidates.append(link.split("zoneinfo/", 1)[1])
+        for name in candidates:
+            if name:
+                try:
+                    return ZoneInfo(name)
+                except Exception:
+                    continue
+    except ImportError:
+        pass
+    return datetime.now().astimezone().tzinfo
 
 
 def get_settings(api_key: Optional[str] = None, workspace_id: Optional[str] = None, require_key: bool = True) -> Settings:

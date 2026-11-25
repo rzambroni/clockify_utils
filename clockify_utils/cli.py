@@ -88,7 +88,7 @@ def _normalize_entry(e: dict, tz, project_names: Optional[dict] = None, user_nam
 
 def cmd_config_init(args) -> int:
     """Copy the currently resolved key/workspace into the shared prefs file."""
-    s = get_settings(require_key=True)
+    s = get_settings(args.api_key, args.workspace, require_key=True)
     prefs = load_prefs()
     if prefs.get("api_key") and prefs["api_key"] != s.api_key and not args.force:
         print(f"❌ {prefs_path()} already has a different api_key. Use --force to overwrite it.", file=sys.stderr)
@@ -103,7 +103,7 @@ def cmd_config_init(args) -> int:
 def cmd_config(args) -> int:
     if getattr(args, "action", None) == "init":
         return cmd_config_init(args)
-    s = get_settings(require_key=False)
+    s = get_settings(args.api_key, args.workspace, require_key=False)
     info = {
         "api_key": s.masked_key(),
         "api_key_source": s.api_key_source or None,
@@ -211,11 +211,13 @@ def cmd_log(args) -> int:
         raise ValueError("Pass --end HH:MM or --duration (e.g. 1.5 hours)")
     if args.date:
         days = [parse_date(d) for d in args.date]
-    elif args.range or args.date_from:
+    elif args.range or args.date_from or args.date_to:
         a, b = resolve_range(args.range, args.date_from, args.date_to)
         days = days_between(a, b, weekdays_only=not args.include_weekends)
     else:
         days = [datetime.now(s.tz).date()]
+    if not days:
+        raise ValueError("No weekdays in that range (use --include-weekends)")
 
     existing: dict = defaultdict(list)
     if not args.allow_duplicates:
@@ -224,7 +226,7 @@ def cmd_log(args) -> int:
             n = _normalize_entry(e, s.tz)
             existing[n["date"]].append(n)
 
-    created, skipped, out = 0, 0, []
+    created, skipped, failed, out = 0, 0, 0, []
     for day in days:
         start = datetime.combine(day, t_start, tzinfo=s.tz)
         end = datetime.combine(day, t_end, tzinfo=s.tz) if t_end else start + timedelta(hours=args.duration)
@@ -243,7 +245,14 @@ def cmd_log(args) -> int:
             if not args.json:
                 print(f"📝 {label}  \"{args.description}\"  (UTC {payload['start']} → {payload['end']})")
             continue
-        entry = client.create_time_entry(start, end, project["id"], args.description, billable=args.billable)
+        try:
+            entry = client.create_time_entry(start, end, project["id"], args.description, billable=args.billable)
+        except Exception as e:  # keep going so already-created days are still reported
+            failed += 1
+            out.append({"date": str(day), "status": "error", "error": str(e)})
+            if not args.json:
+                print(f"❌ {label}: {e}")
+            continue
         created += 1
         out.append({"date": str(day), "status": "created", "id": entry.get("id")})
         if not args.json:
@@ -252,8 +261,9 @@ def cmd_log(args) -> int:
         _emit_json(out)
     else:
         verb = "Would create" if args.dry_run else "Created"
-        print(f"\n{verb}: {len(days) - skipped if args.dry_run else created} · Skipped: {skipped}")
-    return 0
+        print(f"\n{verb}: {len(days) - skipped if args.dry_run else created} · Skipped: {skipped}"
+              + (f" · Failed: {failed}" if failed else ""))
+    return 1 if failed else 0
 
 
 def cmd_week(args) -> int:
@@ -310,6 +320,8 @@ def cmd_gaps(args) -> int:
         if args.user:
             wanted = {client.find_user(u)["id"] for u in args.user}
             users = [u for u in users if u["id"] in wanted]
+            if not users:
+                raise ValueError("None of those users is an active member (drop --all to check inactive users)")
     elif args.user:
         users = [client.find_user(u) for u in args.user]
     else:
@@ -442,8 +454,13 @@ def main(argv: Optional[list] = None) -> None:
     args = build_parser().parse_args(argv)
     try:
         code = args.func(args)
+    except KeyError:
+        raise  # a programming error, not bad input: keep the traceback
     except (SettingsError, LookupError, ValueError) as e:
-        print(f"❌ {e}", file=sys.stderr)
+        if getattr(args, "json", False):
+            _emit_json({"error": str(e)})
+        else:
+            print(f"❌ {e}", file=sys.stderr)
         code = 2
     except Exception as e:  # API errors etc.
         if getattr(args, "json", False):
