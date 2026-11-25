@@ -17,6 +17,10 @@ workspace_id: "your-workspace-id-here"
 # Hour to start the first entry (24h format)
 day_start_hour: 9
 
+# By default day_start_hour is sent to Clockify as UTC (09:00 UTC = 06:00 in
+# Argentina). Set to true to use your local timezone instead.
+# local_time: true
+
 # Weekly schedule - entries are created in order
 # Each project gets a daily entry with the specified duration
 schedule:

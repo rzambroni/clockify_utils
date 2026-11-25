@@ -1,0 +1,13 @@
+#!/bin/bash
+# Launcher for the `clockify` CLI without pip install.
+# Symlink it somewhere on PATH:  ln -s "$PWD/bin/clockify" ~/.local/bin/clockify
+SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+REPO="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
+export PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONWARNINGS="${PYTHONWARNINGS:-ignore::Warning:urllib3}"
+exec "${CLOCKIFY_PYTHON:-/usr/bin/python3}" -m clockify_utils "$@"
