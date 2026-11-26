@@ -152,12 +152,18 @@ python3 -m unittest discover tests     # offline, no API calls
    ```bash
    git checkout -b feature/your-feature-name
    ```
-2. **Make your changes** and commit them.
-3. **Push your branch** to GitHub:
+2. **Make your changes** and commit them using
+   [Conventional Commits](https://www.conventionalcommits.org/) with a scope,
+   for example `feat(cli): add gaps command` or `fix(cli): handle empty ranges`.
+3. **Run the tests** before opening a PR:
+   ```bash
+   python3 -m unittest discover tests
+   ```
+4. **Push your branch** to GitHub:
    ```bash
    git push origin feature/your-feature-name
    ```
-4. **Open a Pull Request** on GitHub for review.
+5. **Open a Pull Request** on GitHub for review.
 
 > [!IMPORTANT]
 > Direct pushes to the `main` branch are restricted. Please use Pull Requests for all changes.
