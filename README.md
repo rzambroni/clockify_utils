@@ -14,6 +14,13 @@ Everything that worked before still works the same way: `Clockify Menu.app`,
    ```bash
    pip install -r requirements.txt
    ```
+   Or install the package in editable mode, which also puts a `clockify`
+   command on your PATH:
+   ```bash
+   pip install -e .
+   ```
+   `requirements.txt` mirrors the dependencies in `pyproject.toml`; keep both in
+   sync when adding one.
 
 2. **Set up your environment:**
    ```bash
@@ -28,6 +35,11 @@ Everything that worked before still works the same way: `Clockify Menu.app`,
    ```bash
    ln -s "$PWD/bin/clockify" ~/.local/bin/clockify
    clockify config          # shows where the key/workspace/timezone come from
+   ```
+   The launcher runs `python3` from your PATH. To use another interpreter (for
+   example a virtualenv), set `CLOCKIFY_PYTHON`:
+   ```bash
+   export CLOCKIFY_PYTHON="$HOME/.venvs/clockify/bin/python"
    ```
 
 5. **Get your workspace and project IDs:**
@@ -140,12 +152,18 @@ python3 -m unittest discover tests     # offline, no API calls
    ```bash
    git checkout -b feature/your-feature-name
    ```
-2. **Make your changes** and commit them.
-3. **Push your branch** to GitHub:
+2. **Make your changes** and commit them using
+   [Conventional Commits](https://www.conventionalcommits.org/) with a scope,
+   for example `feat(cli): add gaps command` or `fix(cli): handle empty ranges`.
+3. **Run the tests** before opening a PR:
+   ```bash
+   python3 -m unittest discover tests
+   ```
+4. **Push your branch** to GitHub:
    ```bash
    git push origin feature/your-feature-name
    ```
-4. **Open a Pull Request** on GitHub for review.
+5. **Open a Pull Request** on GitHub for review.
 
 > [!IMPORTANT]
 > Direct pushes to the `main` branch are restricted. Please use Pull Requests for all changes.
